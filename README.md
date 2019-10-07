@@ -1,7 +1,8 @@
 base_project
 ==============================
 
-An addition to the "Cookiecutter Data Science" project.
+This project contains some basic additions to the cookiecutter datascience project that I typically use across all 
+projects for which I follow this template. Simply git clone this for a faster start-up.
 
 Project Organization
 ------------
