@@ -40,6 +40,11 @@ Project Organization
     │   │
     │   ├── features       <- Scripts to turn raw data into features for modeling
     │   │   └── build_features.py
+    │   │
+    │   ├── omni           <- Global functions to be used everywhere.
+    │   │   │                 
+    │   │   ├── decorators.py
+    │   │   └── functions.py
     │   │
     │   ├── models         <- Scripts to train models and then use trained models to make
     │   │   │                 predictions
