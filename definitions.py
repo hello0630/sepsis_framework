@@ -6,7 +6,7 @@ from definitions import *
 """
 from pathlib import Path
 
-ROOT_DIR = str(Path(__file__).resolve().parents[2])
+ROOT_DIR = str(Path(__file__).resolve().parents[0])
 DATA_DIR = ROOT_DIR + '/data'
 MODELS_DIR = ROOT_DIR + '/models'
 
