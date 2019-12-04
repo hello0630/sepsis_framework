@@ -27,3 +27,5 @@ class LabelsToScores(BaseIDTransformer):
         scores['utility'] = scores[1] - scores[0]
 
         return scores
+
+
