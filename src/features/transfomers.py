@@ -1,3 +1,4 @@
+from definitions import *
 import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
@@ -203,3 +204,7 @@ class DerivedFeatures(TransformerMixin, BaseEstimator):
         # df['SIRS'] = sirs_df['SIRS']
         # df['SIRS_path'] = sirs_df['SIRS_path']
         return df
+
+
+if __name__ == '__main__':
+    dataset = load_pickle(DATA_DIR + '/interim/from_raw/sepsis_dataset.dill', use_dill=True)
