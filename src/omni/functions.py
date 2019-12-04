@@ -63,33 +63,6 @@ def load_json(filename):
     return obj
 
 
-def ppprint(message, color='blue', start=False):
-    """
-    Color prints a message, generally used to print info when running sake
-
-    Args:
-        message (str): The message to print.
-        color (str): Color to print.
-        start (bool): Set to true for a new line start and dash line break>
-
-    Returns:
-        None
-    :return: None (prints message to console)
-    """
-    # initialise the color
-    init_col = eval('fg.li_{}'.format(color))
-
-    # Extra emphasis if a major function
-    if start:
-        message = '\n' + message + '\n' + '-' * 100
-
-    # sty message
-    to_print = init_col + message + fg.rs
-
-    # Print to terminal
-    print(to_print)
-
-
 def basic_parallel_loop(func, *args, parallel=True):
     """ Basic parallel computation loop.
 
@@ -127,10 +100,4 @@ def groupby_apply_parallel(grouped_df, func, *args):
     with Pool(cpu_count()) as p:
         return_list = p.starmap(func, [(group, *args) for name, group in grouped_df])
     return pd.concat(return_list)
-
-
-if __name__ == '__main__':
-    def mult(a, b): return a*a*b
-    args = [(i, i) for i in range(10000)]
-    basic_parallel_loop(mult, args)
 
