@@ -3,7 +3,6 @@ import dill, pickle
 from multiprocessing import Pool, cpu_count
 from joblib import Parallel, delayed
 import json
-from sty import fg, bg
 import pandas as pd
 
 
