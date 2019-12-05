@@ -66,7 +66,7 @@ class RollingSignature():
         return signatures
 
 
-def get_signature_feature_names(feature_names, depth, logsig=False):
+def get_signature_feature_names(feature_names, depth, logsig=False, append_string=None):
     """Given some input feature names, gets the corresponding signature features names up to a given depth.
 
     Args:
@@ -74,6 +74,8 @@ def get_signature_feature_names(feature_names, depth, logsig=False):
                               signature transformation.
         depth (int): The depth of the signature computed to.
         logsig (bool): True for names in the logsig transform.
+        append_string (str): A string to append to the start of each col name. This is used to signify what computation
+                             was performed in signature generation to help distinguish from original column names.
 
     Returns:
         list: List of feature names that correspond to the output columns of the signature transformation.
@@ -90,6 +92,8 @@ def get_signature_feature_names(feature_names, depth, logsig=False):
             for i in range(len(lyndon_str)):
                 lyndon_str[i] = lyndon_str[i].replace(str(num), str(feature_names[num]))
         sig_names = lyndon_str
+    if append_string != None:
+        sig_names = [append_string + '_' + x for x in sig_names]
     return sig_names
 
 
