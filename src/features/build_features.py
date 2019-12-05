@@ -3,6 +3,7 @@ import numpy as np
 import torch
 from src.data.dicts import features
 from src.features.signatures.compute import RollingSignature, get_signature_feature_names
+from src.features.transfomers import RollingStatistic
 from src.features.functions import pytorch_rolling
 
 dataset = load_pickle(DATA_DIR + '/interim/from_raw/sepsis_dataset.dill', use_dill=True)

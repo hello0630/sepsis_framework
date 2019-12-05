@@ -1,3 +1,8 @@
+"""
+compute.py
+================================
+Classes for signature computation.
+"""
 import numpy as np
 import torch
 import signatory

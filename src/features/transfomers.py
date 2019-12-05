@@ -15,6 +15,13 @@ class RollingStatistic():
     along this W dimension to give the statistic over the rolling window.
     """
     def __init__(self, statistic, window_length, step_size=1):
+        """
+        # TODO implement a method that removes statistics that contained insufficient data.
+        Args:
+            statistic (str): The statistic to compute.
+            window_length (int): Length of the window.
+            step_size (int): Window step size.
+        """
         self.statistic = statistic
         self.window_length = window_length
         self.step_size = step_size
