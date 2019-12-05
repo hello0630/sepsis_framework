@@ -5,8 +5,18 @@ from src.data.dicts import features
 from src.features.signatures.compute import RollingSignature, get_signature_feature_names
 from src.features.functions import pytorch_rolling
 
-
 dataset = load_pickle(DATA_DIR + '/interim/from_raw/sepsis_dataset.dill', use_dill=True)
+
+
+
+data = dataset.loc[:, features['laboratory']]
+RollingStatistic(statistic='max', window_length=6, step_size=1).transform(data)
+
+# Compute number of measurements
+unfold = pytorch_rolling(data, 1, 8, 1)
+num_measurements = (1 - np.isnan(unfold)).float().sum(axis=3)
+col_names = ['COUNT.LB8_' + x for x in features['laboratory']]
+dataset.add_features(num_measurements, col_names)
 
 # Compute max val of the vitals
 data = dataset.loc[:, features['vitals']]
