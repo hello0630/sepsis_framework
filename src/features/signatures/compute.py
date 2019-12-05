@@ -15,7 +15,7 @@ class RollingSignature():
         and then stack together and add some initial nan rows to illustrate a window of sufficient did not exist yet (if
         specified).
     """
-    def __init__(self, window, depth, logsig=False, return_same_size=True, column_names=False):
+    def __init__(self, window, depth, logsig=False, return_same_size=True):
         """
         Args:
             window (int): Length of the rolling window.
