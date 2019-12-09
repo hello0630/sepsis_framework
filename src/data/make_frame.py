@@ -2,10 +2,11 @@
 This file transforms the raw .psv files into a dataframe.
 """
 from definitions import *
+import torch
+from torch.utils.data import Dataset
+import numpy as np
 import pandas as pd
 from src.data.transformers import LabelsToScores
-
-
 
 
 if __name__ == '__main__':
@@ -42,3 +43,7 @@ if __name__ == '__main__':
     scores = LabelsToScores().transform(df)
     save_pickle(scores['utility'], DATA_DIR + '/processed/labels/utility_scores.pickle')
     save_pickle(scores, DATA_DIR + '/processed/labels/full_scores.pickle')
+    save_pickle(df['SepsisLabel'], DATA_DIR + '/processed/labels/binary.pickle')
+
+
+
