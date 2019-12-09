@@ -43,6 +43,7 @@ if __name__ == '__main__':
     scores = LabelsToScores().transform(df)
     save_pickle(scores['utility'], DATA_DIR + '/processed/labels/utility_scores.pickle')
     save_pickle(scores, DATA_DIR + '/processed/labels/full_scores.pickle')
+    save_pickle(df['SepsisLabel'], DATA_DIR + '/processed/labels/binary.pickle')
 
 
 

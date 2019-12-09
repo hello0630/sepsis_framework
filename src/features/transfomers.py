@@ -7,6 +7,32 @@ from src.features.functions import pytorch_rolling
 import warnings
 
 
+class FeaturePipeline():
+    """Basic feature transformation pipeline.
+
+    This class currently works with feature transformers that contain a transform method and do not require fitting.
+    Takes a steps argument that should consist of feature transformers that take a torch.Tensor of shape [N, L, C] and
+    output data of shape [N, L, new_features].
+    """
+    def __init__(self, steps):
+        """
+        Args:
+            steps (list): List of tuples where each tuple element of the list is of the form (name, cols, transformer).
+                          'name' is the name of the transformation step, 'cols' are the column names the transformer is
+                          to act on, and 'transformer' is a class containing a transform method that acts on a 3D
+                          torch.Tensor to return transformed features.
+        """
+        self.steps = steps
+
+    def transform(self, dataset):
+        outputs = []
+        for name, cols, transformer in self.steps:
+            output = transformer.transform(dataset[cols])
+            outputs.append(output)
+        outputs = torch.cat(outputs, dim=-1)
+        return outputs
+
+
 class RollingStatistic():
     """Applies statistics to a rolling window along the time dimension of a tensor.
 

@@ -95,7 +95,6 @@ class ForwardFill():
 
     https://stackoverflow.com/questions/41190852/most-efficient-way-to-forward-fill-nan-values-in-numpy-array
     """
-
     @staticmethod
     def ffill2d(arr):
         """ 2d ffill. """
