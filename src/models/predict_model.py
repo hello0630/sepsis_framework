@@ -5,7 +5,7 @@ from sklearn.model_selection import cross_val_predict
 from lightgbm import LGBMRegressor
 from src.data.dicts import features
 from src.data.transformers import ForwardFill, DerivedFeaturesTorch
-from src.features.signatures.compute import RollingSignature, get_signature_feature_names
+from src.features.signatures.compute import RollingSignature
 from src.features.transfomers import RollingStatistic, FeaturePipeline
 from src.models.model_selection import CustomStratifiedGroupKFold
 
