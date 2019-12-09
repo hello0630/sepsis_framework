@@ -102,3 +102,14 @@ class CumulativeSum():
         return torch.cumsum(X, 1)
 
 
+class AppendZero():
+    """ This will append a zero starting vector to every path. """
+    def __init__(self):
+        pass
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        zero_vec = torch.zeros(size=(X.size(0), 1, X.size(2)))
+        return torch.cat((zero_vec, X), dim=1)

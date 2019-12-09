@@ -49,7 +49,7 @@ class RollingSignature():
         start_points = end_points - window_len
         return start_points, end_points
 
-    def compute(self, paths):
+    def transform(self, paths):
         # Path info
         N, L, C = paths.shape[0], paths.shape[1], paths.shape[2]
 
@@ -104,7 +104,21 @@ def get_signature_feature_names(feature_names, depth, logsig=False, append_strin
 
 if __name__ == '__main__':
     from definitions import *
+    from sklearn.pipeline import Pipeline
+    from src.features.signatures.augmentations import *
+    from src.features.transfomers import RollingStatistic
     dataset = load_pickle(DATA_DIR + '/interim/from_raw/sepsis_dataset.dill', use_dill=True)
 
-    signatures = RollingSignature(window=3, depth=3).compute(dataset.data[:, :, [0, 1]])
-    logsignatures = RollingSignature(window=3, depth=3, logsig=True).compute(dataset.data[:, :, [0, 1]])
+    data = torch.tensor([1.0, 2.0, 4., 5.]).reshape(1, 4, 1)
+
+    rs = RollingStatistic(statistic='moments', window_length=3, func_kwargs={'n': 3}).transform(data)
+
+    # cs_steps = [
+    #     ('cumulative_sum', CumulativeSum(append_zero=True)),
+    #     ('lead_lag', LeadLag()),
+    # ]
+    # cs_pipe = Pipeline(cs_steps)
+    # out = cs_pipe.transform(data)
+    # signatures = signatory.logsignature(out, 2)
+    # data.var()
+    #

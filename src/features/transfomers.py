@@ -4,6 +4,7 @@ import pandas as pd
 import torch
 from sklearn.base import BaseEstimator, TransformerMixin
 from src.features.functions import pytorch_rolling
+import warnings
 
 
 class RollingStatistic():
@@ -14,7 +15,7 @@ class RollingStatistic():
     dimension contains the most recent W time-steps (with nans if not filled). The specified statistic is then computed
     along this W dimension to give the statistic over the rolling window.
     """
-    def __init__(self, statistic, window_length, step_size=1):
+    def __init__(self, statistic, window_length, step_size=1, func_kwargs={}):
         """
         # TODO implement a method that removes statistics that contained insufficient data.
         Args:
@@ -25,6 +26,7 @@ class RollingStatistic():
         self.statistic = statistic
         self.window_length = window_length
         self.step_size = step_size
+        self.func_kwargs = func_kwargs
 
     @staticmethod
     def max(data):
@@ -47,7 +49,36 @@ class RollingStatistic():
         """ Counts the number of non nan values. """
         return (1 - np.isnan(data)).float().sum(axis=3)
 
+    @staticmethod
+    def moments(data, n=2):
+        """Gets statistical moments from the data.
+
+        Args:
+            data (torch.Tensor): Pytorch rolling window data.
+            n (int): Moments to compute up to. Must be >=2 computes moments [2, 3, ..., n].
+        """
+        # Removes the mean of empty slice warning
+        warnings.filterwarnings("ignore", category=RuntimeWarning)
+        assert n >= 2, "Number of moments is {}, must be >= 2.".format(n)
+
+        # Pre computation
+        nanmean = torch.Tensor(np.nanmean(data, axis=3)).unsqueeze(-1)
+        frac = 1 / (data.size(3) - 1)
+        mean_reduced = data - nanmean
+
+        # Compute each moment individually
+        moments = []
+        for i in range(2, n+1):
+            moment = frac * (mean_reduced ** i).sum(axis=3)
+            moments.append(moment)
+        moments = torch.cat(moments, dim=2)
+
+        return moments
+
     def transform(self, data):
+        # Remove mean of empty slice warning
+        warnings.filterwarnings("ignore", category=RuntimeWarning)
+
         # Error handling
         assert self.statistic in dir(self), 'Statistic {} is not implemented via this method.'
 
@@ -55,10 +86,10 @@ class RollingStatistic():
         func = eval('self.{}'.format(self.statistic))
 
         # Make rolling
-        rolling = pytorch_rolling(data, 1, 8, 1)
+        rolling = pytorch_rolling(data, 1, self.window_length, self.step_size)
 
         # Apply and output
-        output = func(rolling)
+        output = func(rolling, **self.func_kwargs)
 
         return output
 

@@ -9,34 +9,6 @@ import pandas as pd
 from src.data.transformers import LabelsToScores
 
 
-class SepsisDataset(Dataset):
-    def __init__(self, data=None, labels=None, columns=None, lengths=None, ids=None):
-        self.data = data
-        self.labels = labels
-        self.columns = columns
-        self.lengths = lengths
-        self.ids = ids
-
-        # Additional indexing methods
-    def from_dataframe(self, df):
-        # Get id and labels
-        ids = df['id']
-        self.ids = ids.unique()
-        self.labels = df['SepsisLabel']
-
-        # Drop non-needed cols
-        df = df.drop(['id', 'time', 'SepsisLabel'], axis=1)
-        self.columns = df.columns
-
-        # Pad and store
-        paths = [torch.Tensor(df[ids == id]).values for id in self.ids]
-        self.data = torch.nn.utils.rnn.pad_sequence(paths, padding_value=np.nan)
-        self.lengths = [len(p) for p in paths]
-
-        return self
-
-
-
 if __name__ == '__main__':
     # File locations
     locations = [DATA_DIR + '/raw/' + x for x in ['training_A', 'training_B']]
