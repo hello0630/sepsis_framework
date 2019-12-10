@@ -8,7 +8,7 @@ from src.data.transformers import ForwardFill, DerivedFeaturesTorch
 from src.features.signatures.compute import RollingSignature
 from src.features.transfomers import RollingStatistic, FeaturePipeline
 from src.models.model_selection import CustomStratifiedGroupKFold
-
+from src.models.optimizers import ThresholdOptimizer, TorchThresholdOptimizer
 
 # Load the data
 dataset = load_pickle(DATA_DIR + '/interim/from_raw/sepsis_dataset.dill', use_dill=True)
@@ -22,11 +22,11 @@ dataset = DerivedFeaturesTorch().transform(dataset)
 
 # Compute some features
 steps = [
-    ('count', features['laboratory'], RollingStatistic(statistic='count', window_length=8)),
+    # ('count', features['laboratory'], RollingStatistic(statistic='count', window_length=8)),
     ('max', features['vitals'], RollingStatistic(statistic='max', window_length=6)),
     ('min', features['vitals'], RollingStatistic(statistic='min', window_length=6)),
-    ('moments', features['non_demographic'], RollingStatistic(statistic='moments', window_length=8, func_kwargs={'n': 3})),
-    ('signatures', ['HR', 'MAP'], RollingSignature(window=6, depth=3, logsig=True)),
+    # ('moments', features['non_demographic'], RollingStatistic(statistic='moments', window_length=8, func_kwargs={'n': 3})),
+    # ('signatures', ['HR', 'MAP'], RollingSignature(window=6, depth=3, logsig=True)),
 ]
 features = FeaturePipeline(steps=steps).transform(dataset)
 dataset.add_features(features)
@@ -42,4 +42,8 @@ clf = LGBMRegressor().set_params(**{'n_estimators': 100, 'learning_rate': 0.1})
 
 # Make predictions
 predictions = cross_val_predict(clf, X, y, cv=cv, n_jobs=-1)
+
+# # Perform thresholding
+scores = TorchThresholdOptimizer(dataset.labels, predictions).optimize_cv(cv, parallel=False)
+print('Average: {}'.format(np.mean(scores)))
 

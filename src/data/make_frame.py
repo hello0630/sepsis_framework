@@ -6,6 +6,7 @@ import torch
 from torch.utils.data import Dataset
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 from src.data.transformers import LabelsToScores
 
 
@@ -19,8 +20,8 @@ if __name__ == '__main__':
     # Make dataframe with
     id = 0
     hospital = 1
-    for loc in locations:
-        for file in os.listdir(loc):
+    for loc in tqdm(locations):
+        for file in tqdm(os.listdir(loc)):
             id_df = pd.read_csv(loc + '/' + file, sep='|')
             id_df['id'] = id    # Give a unique id
             id_df['hospital'] = hospital    # Note the hospital
