@@ -3,6 +3,7 @@ compute.py
 ================================
 Classes for signature computation.
 """
+from definitions import *
 import numpy as np
 import torch
 import signatory
@@ -49,6 +50,7 @@ class RollingSignature():
         start_points = end_points - window_len
         return start_points, end_points
 
+    @timeit
     def transform(self, paths):
         # Path info
         N, L, C = paths.shape[0], paths.shape[1], paths.shape[2]

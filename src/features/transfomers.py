@@ -101,6 +101,7 @@ class RollingStatistic():
 
         return moments
 
+    @timeit
     def transform(self, data):
         # Remove mean of empty slice warning
         warnings.filterwarnings("ignore", category=RuntimeWarning)

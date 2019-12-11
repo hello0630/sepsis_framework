@@ -35,7 +35,7 @@ class DerivedFeaturesTorch():
     @staticmethod
     def sofa(dataset):
         N, L, C = dataset.data.size()
-        sofa = torch.zeros(N, L, 1)
+        sofa = np.nan * torch.ones(N, L, 1)
 
         # Coagulation
         platelets = dataset['Platelets']
@@ -68,6 +68,7 @@ class DerivedFeaturesTorch():
 
         return sofa
 
+    @timeit
     def transform(self, dataset):
         # SOFA
         dataset.add_features(self.sofa(dataset), ['SOFA'])
@@ -104,19 +105,10 @@ class ForwardFill():
         out = arr[np.arange(idx.shape[0])[:, None], idx]
         return out
 
+    @timeit
     def transform(self, data):
         data_ffilled = torch.Tensor([self.ffill2d(x.numpy().T) for x in data]).transpose(1, 2)
         return data_ffilled
 
-
-if __name__ == '__main__':
-    dataset = load_pickle(DATA_DIR + '/interim/from_raw/sepsis_dataset.dill', use_dill=True)
-
-    # Perform forward fill
-    ffill = ForwardFill().transform(dataset.data)
-    dataset.update_data(ffill)
-
-    # Derive features
-    dataset = DerivedFeaturesTorch().transform(dataset)
 
 

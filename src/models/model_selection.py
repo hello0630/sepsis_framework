@@ -1,6 +1,7 @@
 import itertools
 import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
+from src.omni.decorators import timeit
 
 
 class CustomStratifiedGroupKFold(BaseEstimator, TransformerMixin):
@@ -12,6 +13,7 @@ class CustomStratifiedGroupKFold(BaseEstimator, TransformerMixin):
         self.seed = seed if isinstance(seed, int) else np.random.randint(10000)
 
 
+    @timeit
     def split(self, dataset):
         # Set a seed so the same cv is used everytime
         np.random.seed(self.seed)
