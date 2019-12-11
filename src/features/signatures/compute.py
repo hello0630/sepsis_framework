@@ -7,25 +7,28 @@ from definitions import *
 import numpy as np
 import torch
 import signatory
+from src.features.signatures.augmentations import LeadLag
 from src.features.signatures.functions import leadlag_slice
 
 
 class DatasetSignatures():
     """ Signature computation method to work on TimeSeriesDatasets. """
-    def __init__(self, augmentations, window, depth, logsig=False, leadlag=False, nanfill=True):
+    def __init__(self, augmentations, window, depth, logsig=False, nanfill=True):
         self.augmentations = augmentations
         self.window = window
         self.depth = depth
         self.logsig = logsig
-        self.leadlag = leadlag
         self.nanfill = nanfill
+
+        if any([isinstance(x, LeadLag) for x in augmentations] + ['leadlag' in augmentations]):
+            self.leadlag_slice = True
 
     def augment(self, data):
         for augmentation in self.augmentations:
             data = augmentation.transform(data)
         return data
 
-    def transform(self, data):
+    def single_transform(self, data):
         # Replace nans with zeros during this calculation
         if self.nanfill:
             nanmask = np.isnan(data).sum(axis=2) > 0
@@ -37,13 +40,24 @@ class DatasetSignatures():
         # Compute the rolling signature with options
         signatures = RollingSignature(window=self.window, depth=self.depth, logsig=self.logsig).transform(aug_data)
 
+        # Keep only the useful leadlag slices
+        if self.leadlag_slice:
+            signatures = leadlag_slice(signatures)
+
         # Refill with nans
         if self.nanfill:
             signatures[nanmask] = np.nan
 
-        # Keep only the useful leadlag slices
-        if self.leadlag:
-            signatures[:, leadlag_slice(), :]
+        return signatures
+
+    def transform(self, dataset, columns):
+        signatures = []
+
+        # Iterate
+        for cols in columns:
+            signatures.append(self.single_transform(dataset[cols]))
+
+        signatures = torch.cat(signatures, dim=2)
 
         return signatures
 
@@ -128,10 +142,6 @@ if __name__ == '__main__':
         LeadLag(),
     ]
 
-    DatasetSignatures(augmentations, window=8, depth=3, logsig=True, nanfill=True).transform(data)
+    signatures = DatasetSignatures(augmentations, window=8, depth=3, logsig=True, nanfill=True, leadlag=True).transform(data)
 
-    x = LeadLag().transform(data)
-    y = RollingSignature(window=8, depth=3, logsig=True).transform(x)
-
-    y[:, slice(0, y.shape[1], 2), :]
 

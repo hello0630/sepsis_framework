@@ -40,4 +40,4 @@ def get_signature_feature_names(feature_names, depth, logsig=False, append_strin
 
 def leadlag_slice(leadlag_data):
     """ Slice indexer to pull filter additional pieces from a leadlag transformation. """
-    return slice(0, leadlag_data.size(1), 2)
+    return leadlag_data[:, slice(0, leadlag_data.size(1), 2), :]
