@@ -30,3 +30,5 @@ def pytorch_rolling(x, dimension, window_size, step_size=1, return_same_size=Tru
     unfolded = x.unfold(dimension, window_size, step_size)
 
     return unfolded
+
+

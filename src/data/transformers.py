@@ -35,7 +35,7 @@ class DerivedFeaturesTorch():
     @staticmethod
     def sofa(dataset):
         N, L, C = dataset.data.size()
-        sofa = np.nan * torch.ones(N, L, 1)
+        sofa = torch.zeros(N, L, 1)
 
         # Coagulation
         platelets = dataset['Platelets']

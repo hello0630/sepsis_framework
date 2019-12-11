@@ -7,6 +7,46 @@ from definitions import *
 import numpy as np
 import torch
 import signatory
+from src.features.signatures.functions import leadlag_slice
+
+
+class DatasetSignatures():
+    """ Signature computation method to work on TimeSeriesDatasets. """
+    def __init__(self, augmentations, window, depth, logsig=False, leadlag=False, nanfill=True):
+        self.augmentations = augmentations
+        self.window = window
+        self.depth = depth
+        self.logsig = logsig
+        self.leadlag = leadlag
+        self.nanfill = nanfill
+
+    def augment(self, data):
+        for augmentation in self.augmentations:
+            data = augmentation.transform(data)
+        return data
+
+    def transform(self, data):
+        # Replace nans with zeros during this calculation
+        if self.nanfill:
+            nanmask = np.isnan(data).sum(axis=2) > 0
+            data[nanmask] = 0
+
+        # Apply augmentations
+        aug_data = self.augment(data)
+
+        # Compute the rolling signature with options
+        signatures = RollingSignature(window=self.window, depth=self.depth, logsig=self.logsig).transform(aug_data)
+
+        # Refill with nans
+        if self.nanfill:
+            signatures[nanmask] = np.nan
+
+        # Keep only the useful leadlag slices
+        if self.leadlag:
+            signatures[:, leadlag_slice(), :]
+
+        return signatures
+
 
 
 class RollingSignature():
@@ -73,54 +113,25 @@ class RollingSignature():
         return signatures
 
 
-def get_signature_feature_names(feature_names, depth, logsig=False, append_string=None):
-    """Given some input feature names, gets the corresponding signature features names up to a given depth.
-
-    Args:
-        feature_names (list): A list of feature names that will correspond to the features of some input path to the
-                              signature transformation.
-        depth (int): The depth of the signature computed to.
-        logsig (bool): True for names in the logsig transform.
-        append_string (str): A string to append to the start of each col name. This is used to signify what computation
-                             was performed in signature generation to help distinguish from original column names.
-
-    Returns:
-        list: List of feature names that correspond to the output columns of the signature transformation.
-    """
-    channels = len(feature_names)
-    if not logsig:
-        words = signatory.all_words(channels, depth)
-        words_lst = [list(x) for x in words]
-        sig_names = ['|'.join([feature_names[x] for x in y]) for y in words_lst]
-    else:
-        lyndon = signatory.lyndon_brackets(channels, depth)
-        lyndon_str = [str(l) for l in lyndon]
-        for num in list(range(len(feature_names))[::-1]):
-            for i in range(len(lyndon_str)):
-                lyndon_str[i] = lyndon_str[i].replace(str(num), str(feature_names[num]))
-        sig_names = lyndon_str
-    if append_string != None:
-        sig_names = [append_string + '_' + x for x in sig_names]
-    return sig_names
-
 
 if __name__ == '__main__':
     from definitions import *
     from sklearn.pipeline import Pipeline
     from src.features.signatures.augmentations import *
-    from src.features.transfomers import RollingStatistic
-    dataset = load_pickle(DATA_DIR + '/interim/from_raw/sepsis_dataset.dill', use_dill=True)
 
-    data = torch.tensor([1.0, 2.0, 4., 5.]).reshape(1, 4, 1)
+    # Load the data
+    dataset = load_pickle(DATA_DIR + '/interim/preprocessed/dataset.dill', use_dill=True)
+    data = dataset.data[[0], :, 0:2]
 
-    rs = RollingStatistic(statistic='moments', window_length=3, func_kwargs={'n': 3}).transform(data)
+    augmentations = [
+        AddTime(),
+        LeadLag(),
+    ]
 
-    # cs_steps = [
-    #     ('cumulative_sum', CumulativeSum(append_zero=True)),
-    #     ('lead_lag', LeadLag()),
-    # ]
-    # cs_pipe = Pipeline(cs_steps)
-    # out = cs_pipe.transform(data)
-    # signatures = signatory.logsignature(out, 2)
-    # data.var()
-    #
+    DatasetSignatures(augmentations, window=8, depth=3, logsig=True, nanfill=True).transform(data)
+
+    x = LeadLag().transform(data)
+    y = RollingSignature(window=8, depth=3, logsig=True).transform(x)
+
+    y[:, slice(0, y.shape[1], 2), :]
+

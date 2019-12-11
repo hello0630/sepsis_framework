@@ -2,6 +2,7 @@ from definitions import *
 import numpy as np
 import pandas as pd
 import torch
+import scipy
 from sklearn.base import BaseEstimator, TransformerMixin
 from src.features.functions import pytorch_rolling
 import warnings
@@ -27,7 +28,11 @@ class FeaturePipeline():
     def transform(self, dataset):
         outputs = []
         for name, cols, transformer in self.steps:
-            output = transformer.transform(dataset[cols])
+            if cols is None:
+                data = dataset.data
+            else:
+                data = dataset[cols]
+            output = transformer.transform(data)
             outputs.append(output)
         outputs = torch.cat(outputs, dim=-1)
         return outputs
@@ -73,7 +78,19 @@ class RollingStatistic():
     @staticmethod
     def count(data):
         """ Counts the number of non nan values. """
-        return (1 - np.isnan(data)).float().sum(axis=3)
+        return data[:, :, :, -1] - data[:, :, :, 0]
+
+    @staticmethod
+    def moments2(data, n=2):
+        """ Scipy moments computation. """
+        moments = []
+        for i in range(2, n + 1):
+            masked = scipy.stats.moment(data, moment=i, axis=3, nan_policy='omit')
+            moment = masked.data
+            moment[masked.mask] = np.nan
+            moments.append(torch.Tensor(moment))
+        moments = torch.cat(moments, dim=2)
+        return moments
 
     @staticmethod
     def moments(data, n=2):
@@ -89,15 +106,17 @@ class RollingStatistic():
 
         # Pre computation
         nanmean = torch.Tensor(np.nanmean(data, axis=3)).unsqueeze(-1)
-        frac = 1 / (data.size(3) - 1)
+        frac = torch.Tensor(1 / (data.size(3) - np.isnan(data.numpy()).sum(axis=3)))
+        frac[frac == float("Inf")] = float('nan')
         mean_reduced = data - nanmean
 
         # Compute each moment individually
         moments = []
         for i in range(2, n+1):
-            moment = frac * (mean_reduced ** i).sum(axis=3)
+            moment = torch.mul(frac, torch.Tensor(np.nansum((mean_reduced ** i), axis=3)))
             moments.append(moment)
-        moments = torch.cat(moments, dim=2)
+        moments = np.concatenate(moments, axis=2)
+        moments = torch.Tensor(moments)
 
         return moments
 
@@ -107,7 +126,7 @@ class RollingStatistic():
         warnings.filterwarnings("ignore", category=RuntimeWarning)
 
         # Error handling
-        assert self.statistic in dir(self), 'Statistic {} is not implemented via this method.'
+        assert self.statistic in dir(self), 'Statistic {} is not implemented via this method.'.format(self.statistic)
 
         # Setup function
         func = eval('self.{}'.format(self.statistic))
@@ -120,3 +139,14 @@ class RollingStatistic():
 
         return output
 
+
+class CountNonNan():
+    """ Cumulative sum counter for the number of measured (non-nan) values along the time dimension. """
+    def transform(self, data):
+        return np.cumsum((1 - np.isnan(data)).float(), axis=1)
+
+
+if __name__ == '__main__':
+    dataset = load_pickle(DATA_DIR + '/interim/preprocessed/dataset.dill', use_dill=True)
+    data = dataset['HR']
+    moments1 = RollingStatistic(statistic='moments', window_length=7, func_kwargs={'n': 3}).transform(dataset.data)
