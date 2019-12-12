@@ -4,6 +4,7 @@ import torch
 from sklearn.model_selection import cross_val_predict
 import lightgbm as lgb
 from lightgbm import LGBMRegressor, LGBMClassifier
+from xgboost import XGBClassifier
 from src.data.dicts import feature_dict, lgb_params
 from src.features.signatures.compute import RollingSignature, DatasetSignatures
 from src.features.signatures.augmentations import LeadLag, AddTime
@@ -36,32 +37,25 @@ augmentations = [
     # AddTime(),
     LeadLag(),
 ]
-ds = DatasetSignatures(augmentations, window=14, depth=3, logsig=True, nanfill=True)
+signature_transformer = DatasetSignatures(augmentations, window=14, depth=3, logsig=True, nanfill=True)
 features = ['SOFA', 'MAP', 'BUN/CR', 'HR', 'SBP', 'ShockIndexAgeNorm']
-# features = ['SOFA', 'MAP', 'BUN/CR', 'HR', 'SBP']
-signatures = ds.transform(dataset, features)
-print(dataset.data.shape)
+signatures = signature_transformer.transform(dataset, features)
 dataset.add_features(signatures)
-print(dataset.data.shape)
 
 # Extract machine learning data
 X, _ = dataset.to_ml()
-y = dataset.labels_utility
+y, weights = dataset.binary_labels, dataset.binary_weights.numpy()
 
 # Setup cross val
 cv = load_pickle(DATA_DIR + '/processed/cv/5_split.pickle')
+# cv = CustomStratifiedGroupKFold(n_splits=5).split(dataset)
 
-# Classifier with parameters
-# lgb_dataset = lgb.Dataset(X, y, weight=y)
-# lgb.cv({}, lgb_dataset, folds=cv)
-# clf = LGBMClassifier()
-print('Minlabl {}'.format(y.min()))
+# Regressor
+y = dataset.labels_utility
 clf = LGBMRegressor().set_params(**lgb_params)
-
-# Make predictions
 predictions = cross_val_predict(clf, X, y, cv=cv, n_jobs=-1)
 
-# # Perform thresholding
+# Perform thresholding
 print('Thresholding...')
 scores = ThresholdOptimizer(dataset.labels, predictions).optimize_cv(cv, parallel=False)
 print('Average: {:.3f}'.format(np.mean(scores)))
