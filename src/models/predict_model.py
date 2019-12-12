@@ -2,7 +2,8 @@ from definitions import *
 import numpy as np
 import torch
 from sklearn.model_selection import cross_val_predict
-from lightgbm import LGBMRegressor
+import lightgbm as lgb
+from lightgbm import LGBMRegressor, LGBMClassifier
 from src.data.dicts import feature_dict, lgb_params
 from src.features.signatures.compute import RollingSignature, DatasetSignatures
 from src.features.signatures.augmentations import LeadLag, AddTime
@@ -44,12 +45,17 @@ dataset.add_features(signatures)
 print(dataset.data.shape)
 
 # Extract machine learning data
-X, y = dataset.to_ml()
+X, _ = dataset.to_ml()
+y = dataset.labels_utility
 
 # Setup cross val
 cv = load_pickle(DATA_DIR + '/processed/cv/5_split.pickle')
 
 # Classifier with parameters
+# lgb_dataset = lgb.Dataset(X, y, weight=y)
+# lgb.cv({}, lgb_dataset, folds=cv)
+# clf = LGBMClassifier()
+print('Minlabl {}'.format(y.min()))
 clf = LGBMRegressor().set_params(**lgb_params)
 
 # Make predictions

@@ -77,12 +77,6 @@ class DerivedFeatures():
         shock_index = dataset['HR'] / (dataset['SBP'] * dataset['Age'])
         dataset.add_features(shock_index, ['ShockIndexAgeNorm'])
 
-        # Modified shock index
-        msi_age = dataset['HR'] / (dataset['MAP'] * dataset['Age'])
-        msi = dataset['HR'] / (dataset['MAP'])
-        dataset.add_features(msi_age, ['ModSI.Age'])
-        dataset.add_features(msi, ['ModSI.Age'])
-
         # BUN/CR
         bun_cr = dataset['BUN'] / dataset['Creatinine']
         dataset.add_features(bun_cr, ['BUN/CR'])
@@ -91,17 +85,23 @@ class DerivedFeatures():
         sao2_fio2 = dataset['SaO2'] / dataset['FiO2']
         dataset.add_features(sao2_fio2, ['SaO2/FiO2'])
 
-        # SaO2/FiO2
-        urea_creatining = dataset['BUN'] / dataset['Creatinine']
-        dataset.add_features(urea_creatining, ['Urea/Creatinine'])
+        # Modified shock index
+        # msi_age = dataset['HR'] / (dataset['MAP'] * dataset['Age'])
+        # msi = dataset['HR'] / (dataset['MAP'])
+        # dataset.add_features(msi_age, ['ModSI.Age'])
+
+
+        # Urea/Creatinine
+        # urea_creatinine = dataset['BUN'] / dataset['Creatinine']
+        # dataset.add_features(urea_creatinine, ['Urea/Creatinine'])
 
         # Pulse pressure
-        pp = dataset['SBP'] - dataset['DBP']
-        dataset.add_features(pp, ['PP'])
+        # pp = dataset['SBP'] - dataset['DBP']
+        # dataset.add_features(pp, ['PP'])
 
         # Cardiac output
-        co = pp * dataset['HR']
-        dataset.add_features(co, ['CO'])
+        # co = pp * dataset['HR']
+        # dataset.add_features(co, ['CO'])
 
         return dataset
 
