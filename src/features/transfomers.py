@@ -61,11 +61,13 @@ class RollingStatistic():
 
     @staticmethod
     def max(data):
-        return torch.Tensor(np.nanmax(data, axis=3))
+        return data.max(axis=3)[0]
+        # return torch.Tensor(np.nanmax(data, axis=3))
 
     @staticmethod
     def min(data):
-        return torch.Tensor(np.nanmin(data, axis=3))
+        return data.min(axis=3)[0]
+        # return torch.Tensor(np.nanmin(data, axis=3))
 
     @staticmethod
     def mean(data):
@@ -81,18 +83,6 @@ class RollingStatistic():
         return data[:, :, :, -1] - data[:, :, :, 0]
 
     @staticmethod
-    def moments2(data, n=2):
-        """ Scipy moments computation. """
-        moments = []
-        for i in range(2, n + 1):
-            masked = scipy.stats.moment(data, moment=i, axis=3, nan_policy='omit')
-            moment = masked.data
-            moment[masked.mask] = np.nan
-            moments.append(torch.Tensor(moment))
-        moments = torch.cat(moments, dim=2)
-        return moments
-
-    @staticmethod
     def moments(data, n=2):
         """Gets statistical moments from the data.
 
@@ -106,14 +96,15 @@ class RollingStatistic():
 
         # Pre computation
         nanmean = torch.Tensor(np.nanmean(data, axis=3)).unsqueeze(-1)
-        frac = torch.Tensor(1 / (data.size(3) - np.isnan(data.numpy()).sum(axis=3)))
-        frac[frac == float("Inf")] = float('nan')
+        # frac = torch.Tensor(1 / (data.size(3) - np.isnan(data.numpy()).sum(axis=3)))
+        frac = torch.Tensor(1 / (data.size(3) - np.isnan(data.numpy()).sum(axis=3) - 1))
+        frac[(frac == float("Inf")) | (frac < 0)] = float('nan')
         mean_reduced = data - nanmean
 
         # Compute each moment individually
         moments = []
         for i in range(2, n+1):
-            moment = torch.mul(frac, torch.Tensor(np.nansum((mean_reduced ** i), axis=3)))
+            moment = torch.mul(frac, torch.Tensor((mean_reduced ** i).sum(axis=3)))
             moments.append(moment)
         moments = np.concatenate(moments, axis=2)
         moments = torch.Tensor(moments)

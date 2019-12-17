@@ -12,11 +12,10 @@ class CustomStratifiedGroupKFold(BaseEstimator, TransformerMixin):
         self.n_splits = n_splits
         self.seed = seed if isinstance(seed, int) else np.random.randint(10000)
 
-
     @timeit
     def split(self, dataset):
         # Set a seed so the same cv is used everytime
-        np.random.seed(self.seed)
+        # np.random.seed(self.seed)
 
         # Find which ids contain a one
         id_labels = dataset.id_labels()

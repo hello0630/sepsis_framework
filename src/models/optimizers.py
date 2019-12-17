@@ -1,15 +1,15 @@
 from definitions import *
 from multiprocessing.pool import Pool
-import torch
 from nevergrad.optimization import optimizerlib
 from nevergrad import instrumentation as inst
+import torch
 
 
 class ThresholdOptimizer():
     def __init__(self, labels, predictions, budget=200, num_workers=1):
         self.labels = labels
         self.predictions = predictions
-        self.scores = torch.Tensor(load_pickle(DATA_DIR + '/processed/labels/full_scores.pickle').values)
+        self.scores = load_pickle(DATA_DIR + '/processed/labels/full_scores.pickle').values
 
         # Nevergrad options
         self.budget = budget
@@ -22,7 +22,7 @@ class ThresholdOptimizer():
 
         # Precompute the inaction and perfect scores
         inaction_score = scores[:, 0].sum()
-        perfect_score = scores[:, [0, 1]].max(axis=1)[0].sum()
+        perfect_score = scores[:, [0, 1]].max(axis=1).sum()
 
         # Apply the threshold
         predictions = (predictions > thresh).astype(int)
