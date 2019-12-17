@@ -76,7 +76,6 @@ class DatasetSignatures():
         return signatures
 
 
-
 class RollingSignature():
     """Computes signatures from rolling windows.
 

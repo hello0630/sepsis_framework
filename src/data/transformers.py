@@ -90,7 +90,6 @@ class DerivedFeatures():
         # msi = dataset['HR'] / (dataset['MAP'])
         # dataset.add_features(msi_age, ['ModSI.Age'])
 
-
         # Urea/Creatinine
         # urea_creatinine = dataset['BUN'] / dataset['Creatinine']
         # dataset.add_features(urea_creatinine, ['Urea/Creatinine'])

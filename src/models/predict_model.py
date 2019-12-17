@@ -20,15 +20,15 @@ from src.models.optimizers import ThresholdOptimizer
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Load the data
-dataset = load_pickle(DATA_DIR + '/interim/preprocessed/dataset.dill', use_dill=True)
+dataset = load_pickle(DATA_DIR + '/interim/preprocessed/dataset.dill')
 dataset.data.to(device)
 
 # Compute some features
 steps = [
-    # ('count', feature_dict['counts'], RollingStatistic(statistic='count', window_length=8)),
-    # ('max', feature_dict['vitals'], RollingStatistic(statistic='max', window_length=6)),
-    # ('min', feature_dict['vitals'], RollingStatistic(statistic='min', window_length=6)),
-    ('moments', feature_dict['non_demographic'], RollingStatistic(statistic='moments', window_length=8, func_kwargs={'n': 3})),
+    ('count', feature_dict['counts'], RollingStatistic(statistic='count', window_length=8)),
+    ('max', feature_dict['vitals'], RollingStatistic(statistic='max', window_length=6)),
+    ('min', feature_dict['vitals'], RollingStatistic(statistic='min', window_length=6)),
+    # ('moments', feature_dict['non_demographic'], RollingStatistic(statistic='moments', window_length=8, func_kwargs={'n': 3})),
 ]
 features = FeaturePipeline(steps=steps).transform(dataset)
 # names = [x + '_count' for x in feature_dict['counts']] + [x + '_max' for x in feature_dict['vitals']] + [x + '_min' for x in feature_dict['vitals']]

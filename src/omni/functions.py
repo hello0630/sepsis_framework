@@ -32,21 +32,21 @@ def save_pickle(obj, filename, use_dill=False, protocol=4, create_folder=True):
             dill.dump(obj, file)
 
 
-def load_pickle(filename, use_dill=False):
+def load_pickle(filename):
     """ Basic dill/pickle load function.
 
     Args:
         filename (str): Location of the object.
-        use_dill (bool): Set True to load with dill.
 
     Returns:
         python object: The loaded object.
     """
+
     with open(filename, 'rb') as file:
-        if not use_dill:
-            obj = pickle.load(file)
-        else:
+        if filename.split('.')[-1] == 'dill':
             obj = dill.load(file)
+        else:
+            obj = pickle.load(file)
     return obj
 
 
