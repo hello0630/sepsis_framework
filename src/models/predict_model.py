@@ -5,6 +5,7 @@ from sklearn.model_selection import cross_val_predict
 import lightgbm as lgb
 from lightgbm import LGBMRegressor, LGBMClassifier
 from xgboost import XGBClassifier
+from src.data.dataset.dataset import TimeSeriesDataset
 from src.data.dicts import feature_dict, lgb_params
 from src.features.signatures.compute import RollingSignature, DatasetSignatures
 from src.features.signatures.augmentations import LeadLag, AddTime, PenOff, CumulativeSum
@@ -19,7 +20,8 @@ from src.models.optimizers import ThresholdOptimizer
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Load the data
-dataset = load_pickle(DATA_DIR + '/interim/preprocessed/dataset.dill', use_dill=True)
+loc = DATA_DIR + '/interim/preprocessed/dataset.pickle'
+TimeSeriesDataset().load(loc)
 dataset.data.to(device)
 
 # Compute some features

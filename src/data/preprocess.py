@@ -5,6 +5,7 @@ Any preprocessing to apply to the data before we put it into a learning model.
 """
 from definitions import *
 import torch
+from src.data.dataset.dataset import TimeSeriesDataset
 from src.data.dicts import feature_dict as feature_dict
 from src.data.transformers import ForwardFill, DerivedFeatures
 from src.features.transfomers import RollingStatistic, CountNonNan
@@ -44,7 +45,7 @@ def preprocess_labels(scores):
 
 if __name__ == '__main__':
     # Load
-    dataset = load_pickle(DATA_DIR + '/interim/from_raw/sepsis_dataset.dill', use_dill=True)
+    dataset = TimeSeriesDataset(**load_pickle(DATA_DIR + '/interim/from_raw/dataset.pickle'))
     scores = load_pickle(DATA_DIR + '/processed/labels/full_scores.pickle')
 
     # Dataset preprocessing

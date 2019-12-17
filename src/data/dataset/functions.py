@@ -1,5 +1,6 @@
 import numpy as np
 import torch
+import pandas as pd
 
 
 def dataset_assertions(self):
@@ -59,3 +60,31 @@ def index_getter(full_list, idx_items):
     col_mask = [c in idx_items for c in full_list]
 
     return col_mask
+
+
+def tensor_to_frame(data, lengths, columns, ids):
+    """Convert the data into a pandas DataFrame. This method maps to only include the final times.
+
+    Args:
+        data (torch.Tensor): Data of shape [N, L, C]
+        lengths (list): The lengths to extract each tensor to.
+        columns (list): Names of the columns.
+        ids (list): ID names
+
+    Returns:
+        pd.DataFrame: A pandas dataframe.
+    """
+    # Make frame
+    dfs = []
+    for i, data in enumerate(data):
+        length = lengths[i]
+        frame = pd.DataFrame(data=data[:length, :].numpy(), columns=columns)
+        frame['id'] = ids[i]
+        dfs.append(frame)
+    df = pd.concat(dfs)
+
+    # Reorder and reindex
+    df = df[['id'] + [x for x in df.columns if x != 'id']]
+    df = df.reset_index().drop('index', axis=1)
+
+    return df

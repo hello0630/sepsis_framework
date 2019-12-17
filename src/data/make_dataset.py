@@ -76,8 +76,8 @@ class SepsisDataset(Dataset):
         self.columns.extend(columns)
 
     def update_data(self, data):
-        """ Method for updating the data only up to where the length is specified. The rest is left as nan. """
-        assert data.shape == self.data.shape, ('Input data shape {} != current data shape {}.'
+        """ method for updating the data only up to where the length is specified. the rest is left as nan. """
+        assert data.shape == self.data.shape, ('input data shape {} != current data shape {}.'
                                                .format(data.shape, self.data.shape))
         for i in range(self.data.shape[0]):
             self.data[i, :self.lengths[i], :] = data[i, :self.lengths[i], :]
