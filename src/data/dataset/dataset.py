@@ -92,7 +92,7 @@ class TimeSeriesDataset(BaseEstimator):
             int_cols = [x for x in self.columns if isinstance(x, int)]
             if len(int_cols) == 0: int_cols = [-1]
             max_int = max(int_cols)
-            columns = list(range(max_int + 1, max_int + 1 + new_features))
+            columns = [str(x) for x in range(max_int + 1, max_int + 1 + new_features)]
 
         # Error handling
         assert data.shape[0:2] == self.data.shape[0:2], 'Dataset data and input data are different shapes.'

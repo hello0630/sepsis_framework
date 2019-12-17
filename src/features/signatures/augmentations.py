@@ -28,9 +28,6 @@ class AddTime(BaseEstimator, TransformerMixin):
 
 class PenOff(BaseEstimator, TransformerMixin):
     """Adds a 'penoff' dimension to each path. """
-    def fit(self, data, labels=None):
-        return self
-
     def transform(self, X):
         # Batch, length, channels
         B, L, C = X.shape[0], X.shape[1], X.shape[2]

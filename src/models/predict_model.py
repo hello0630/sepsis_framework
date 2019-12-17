@@ -12,6 +12,7 @@ from src.features.signatures.augmentations import LeadLag, AddTime, PenOff, Cumu
 from src.features.transfomers import RollingStatistic, FeaturePipeline
 from src.models.model_selection import CustomStratifiedGroupKFold
 from src.models.optimizers import ThresholdOptimizer
+from src.models.nets.nets import Autoencoder
 # TODO Need to rethink some things, if we intend to do find min/max features then apply penoff, there is a lot of /
 # TODO censored data. Instead we should aim to include time and allow for shorter intervals to be given, but the time
 # TODO exist as a parameter, then the algo can decide for itself...
@@ -21,56 +22,28 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Load the data
 dataset = load_pickle(DATA_DIR + '/interim/preprocessed/dataset.dill')
-dataset.data.to(device)
+# dataset.data.to(device)
 
 # Compute some features
 steps = [
-    ('count', feature_dict['counts'], RollingStatistic(statistic='count', window_length=8)),
+    ('count', feature_dict['counts'], RollingStatistic(statistic='change', window_length=8)),
     ('max', feature_dict['vitals'], RollingStatistic(statistic='max', window_length=6)),
     ('min', feature_dict['vitals'], RollingStatistic(statistic='min', window_length=6)),
     # ('moments', feature_dict['non_demographic'], RollingStatistic(statistic='moments', window_length=8, func_kwargs={'n': 3})),
 ]
 features = FeaturePipeline(steps=steps).transform(dataset)
-# names = [x + '_count' for x in feature_dict['counts']] + [x + '_max' for x in feature_dict['vitals']] + [x + '_min' for x in feature_dict['vitals']]
-dataset.add_features(features)
-
-
-# # Change counts to count/time
-# dataset[[x for x in dataset.columns if '_count' in str(x)]] /= dataset[[x for x in dataset.columns if '_count' in str(x)]] / dataset['ICULOS']
-
+names = [x + '_count' for x in feature_dict['counts']] + [x + '_max' for x in feature_dict['vitals']] + [x + '_min' for x in feature_dict['vitals']]
+dataset.add_features(features, names)
 
 # Signatures
-# augmentations = [
-#     # AddTime(),
-#     LeadLag(),
-# ]
-# signature_transformer = DatasetSignatures(augmentations, window=7, depth=3, logsig=True, nanfill=True)
-# features = ['SOFA', 'MAP', 'BUN/CR', 'ShockIndexAgeNorm', 'HR']
-# signatures = signature_transformer.transform(dataset, features)
-# dataset.add_features(signatures)
-#
-# Penoff signatures
-# augmentations = [
-#     # AddTime(),
-#     PenOff(),
-# ]
-# penoff = DatasetSignatures(augmentations, window=7, depth=3, logsig=True, nanfill=False)
-# features = [x for x in dataset.columns if any([y in x for y in ['_min', '_max']])] + ['SOFA', 'HR', 'MAP', 'ShockIndexAgeNorm', 'SBP', 'DBP', 'BUN/CR']
-# penoff_signatures = penoff.transform(dataset, features)
-# dataset.add_features(penoff_signatures[:, 1:-1, :])
-# print(dataset.data.shape)
-
-# # Cumulative summing
-# augmentations = [
-#     CumulativeSum(append_zero=True),
-#     LeadLag()
-# ]
-# cumsum = DatasetSignatures(augmentations, window=7, depth=3, logsig=True, nanfill=False)
-# cumsum_sigantures = cumsum.transform(dataset, features)
-# dataset.add_features(cumsum_sigantures[:, 1:, :])
-# print(dataset.data.shape)
-
-# dataset.drop(features)
+augmentations = [
+    # AddTime(),
+    LeadLag(),
+]
+signature_transformer = DatasetSignatures(augmentations, window=7, depth=3, logsig=True, nanfill=True)
+features = ['SOFA', 'MAP', 'BUN/CR', 'ShockIndexAgeNorm', 'HR']
+signatures = signature_transformer.transform(dataset, features)
+dataset.add_features(signatures)
 
 # Extract machine learning data
 X, _ = dataset.to_ml()

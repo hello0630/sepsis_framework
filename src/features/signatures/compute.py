@@ -139,9 +139,11 @@ class RollingSignature():
         return signatures
 
 
-
 if __name__ == '__main__':
     from definitions import *
     from sklearn.pipeline import Pipeline
     from src.features.signatures.augmentations import *
 
+    a = torch.Tensor([1, 2, 3, 4, 5]).reshape(-1, 1)
+    b = torch.ones_like(a)
+    c = torch.cat((b, a), dim=1)

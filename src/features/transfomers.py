@@ -78,8 +78,8 @@ class RollingStatistic():
         return torch.Tensor(np.nanvar(data, axis=3))
 
     @staticmethod
-    def count(data):
-        """ Counts the number of non nan values. """
+    def change(data):
+        """ Notes the change in the variable over the interval. """
         return data[:, :, :, -1] - data[:, :, :, 0]
 
     @staticmethod

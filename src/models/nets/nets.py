@@ -15,17 +15,21 @@ class Autoencoder(nn.Module):
         """
         super().__init__()
         self.fc1 = nn.Linear(input_dim, hidden_dim)
+        self.fc2_1 = nn.Linear(hidden_dim, hidden_dim)
         self.fc2 = nn.Linear(hidden_dim, latent_dim)
         self.fc3 = nn.Linear(latent_dim, hidden_dim)
+        self.fc3_1 = nn.Linear(hidden_dim, hidden_dim)
         self.fc4 = nn.Linear(hidden_dim, input_dim)
 
     def encode(self, x):
         h1 = torch.relu(self.fc1(x))
+        h1 = torch.relu(self.fc2_1(h1))
         encoding = torch.relu(self.fc2(h1))
         return encoding
 
     def decode(self, encoding):
         h3 = torch.relu(self.fc3(encoding))
+        h3 = torch.relu(self.fc3_1(h3))
         recon = torch.relu(self.fc4(h3))
         return recon
 
