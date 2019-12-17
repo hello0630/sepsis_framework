@@ -45,7 +45,7 @@ def preprocess_labels(scores):
 
 if __name__ == '__main__':
     # Load
-    dataset = TimeSeriesDataset(**load_pickle(DATA_DIR + '/interim/from_raw/dataset.pickle'))
+    dataset = load_pickle(DATA_DIR + '/interim/from_raw/dataset.dill', use_dill=True)
     scores = load_pickle(DATA_DIR + '/processed/labels/full_scores.pickle')
 
     # Dataset preprocessing
@@ -53,7 +53,6 @@ if __name__ == '__main__':
 
     # Label preprocessing and pass info to dataset
     utility_value, labels = preprocess_labels(scores)
-    dataset.binary_weights = utility_value
-    dataset.binary_labels = labels
+    dataset.labels_utility = utility_value
 
     save_pickle(dataset, DATA_DIR + '/interim/preprocessed/dataset.dill', use_dill=True)

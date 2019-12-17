@@ -20,8 +20,7 @@ from src.models.optimizers import ThresholdOptimizer
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Load the data
-loc = DATA_DIR + '/interim/preprocessed/dataset.pickle'
-TimeSeriesDataset().load(loc)
+dataset = load_pickle(DATA_DIR + '/interim/preprocessed/dataset.dill', use_dill=True)
 dataset.data.to(device)
 
 # Compute some features
@@ -71,7 +70,7 @@ dataset.add_features(features)
 # dataset.add_features(cumsum_sigantures[:, 1:, :])
 # print(dataset.data.shape)
 
-dataset.drop(features)
+# dataset.drop(features)
 
 # Extract machine learning data
 X, _ = dataset.to_ml()

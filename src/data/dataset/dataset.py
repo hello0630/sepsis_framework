@@ -3,11 +3,12 @@ from tqdm import tqdm
 import itertools
 import numpy as np
 import torch
+from sklearn.base import BaseEstimator
 from src.data.dataset.functions import *
 from src.data.dataset.indexers import LocIndexer
 
 
-class TimeSeriesDataset():
+class TimeSeriesDataset(BaseEstimator):
     """Main class for dealing with time-series data.
 
     This class has been built out of a desire to perform matrix operations time-series data where the time-dimension has
@@ -15,8 +16,10 @@ class TimeSeriesDataset():
     series. This class will create a tensor of shape [N, L_max, C] where L_max is the longest time-series in the data
     and provide methods for keeping track of the original time-series components, whilst allowing the data to be
     manipulated through matrix operations.
+
+    # TODO Save method does not work very well.
     """
-    def __init__(self, data=None, labels=None, columns=None, ids=None, lengths=None):
+    def __init__(self, data, labels, columns, ids=None):
         """
         Args:
             data (list): A list of variable length tensors. The shape must be [1, L_i, C] where L_i is the variable time
@@ -24,18 +27,14 @@ class TimeSeriesDataset():
             labels (torch.Tensor): Corresponding labels, to be input as a 1-D tensor.
             columns (list): List of column names of length C.
             ids (list): List of ids (integers preferred) of length N. Defaults to a range(0, N).
-            lengths (list): The lengths of each time-series. This will be auto-computed if data is inserted as a list.
         """
-        if isinstance(data, list):
-            self.data = torch.nn.utils.rnn.pad_sequence(data, padding_value=np.nan, batch_first=True)
-            self.lengths = [d.size(0) for d in data]
-        elif isinstance(data, torch.Tensor):
-            self.data = data
-            self.lengths = lengths
+        self.data = torch.nn.utils.rnn.pad_sequence(data, padding_value=np.nan, batch_first=True)
+        self.lengths = [d.size(0) for d in data]
         self.labels = labels
         self.columns = columns
         self.ids = ids if ids is not None else np.arange(ids)
 
+        # Error handling
         self._assertions()
 
         # Additional indexers
@@ -90,7 +89,7 @@ class TimeSeriesDataset():
 
         # Logic if columns unspecified
         if columns is None:
-            int_cols = [x for x in dataset.columns if isinstance(x, int)]
+            int_cols = [x for x in self.columns if isinstance(x, int)]
             if len(int_cols) == 0: int_cols = [-1]
             max_int = max(int_cols)
             columns = list(range(max_int + 1, max_int + 1 + new_features))
@@ -136,16 +135,6 @@ class TimeSeriesDataset():
             tensor_list.append(self.data[i, 0:l, :])
         return tensor_list
 
-    def save(self, loc):
-        """ Save method. Saves only the necessary components.
-
-        Args:
-            loc (str): The save location. Typically use .tsds extension.
-        """
-        keys = ['data', 'labels', 'columns', 'ids', 'lengths']
-        save_dict = {key: self.__dict__[key] for key in keys}
-        save_pickle(save_dict, loc)
-
     def to_frame(self):
         """ Turn the data into a dataframe. """
         return tensor_to_frame(self.data, self.lengths, self.columns, self.ids)
@@ -159,13 +148,8 @@ class TimeSeriesDataset():
         # Get ML form
         X = torch.cat(self.data_to_list())
         y = self.labels
+        return X, y
 
-        # ID logic
-        if output_ids:
-            ids = self.get_long_ids()
-            return X, y, ids
-        else:
-            return X, y
 
 
 if __name__ == '__main__':
@@ -189,6 +173,6 @@ if __name__ == '__main__':
     dataset = TimeSeriesDataset(data=tensor_data, labels=labels_binary, columns=columns, ids=ids)
 
     # Useful to include binary_labels attr.
-    dataset.save(DATA_DIR + '/interim/from_raw/dataset.pickle')
+    save_pickle(dataset, DATA_DIR + '/interim/from_raw/dataset.dill', use_dill=True)
 
 
