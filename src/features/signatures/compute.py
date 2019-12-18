@@ -139,6 +139,8 @@ class RollingSignature():
         return signatures
 
 
+
+
 if __name__ == '__main__':
     from definitions import *
     from sklearn.pipeline import Pipeline

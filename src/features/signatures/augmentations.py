@@ -5,6 +5,7 @@ Contains sklearn transformers for path augmentations to be applied before comput
 """
 import torch
 from sklearn.base import BaseEstimator, TransformerMixin
+import signatory
 
 
 class AddTime(BaseEstimator, TransformerMixin):
@@ -110,3 +111,17 @@ class AppendZero():
     def transform(self, X):
         zero_vec = torch.zeros(size=(X.size(0), 1, X.size(2)))
         return torch.cat((zero_vec, X), dim=1)
+
+
+if __name__ == '__main__':
+    a = torch.randn((10, 50, 10))
+    a = torch.rand((1, 10, 2))
+    penoff = PenOff().transform(a)
+    true_sig = signatory.signature(penoff, 3)
+
+    c = torch.cat((torch.ones(1, a.shape[1], 1), a), dim=2)
+    basic_sig = signatory.signature(c, 3)
+    d = penoff[:, -2:, :]
+    new_sig = signatory.signature(d, 3, basepoint=c[:, -1, :])
+    signatory.signature_combine(basic_sig, new_sig, input_channels=3, depth=3)
+

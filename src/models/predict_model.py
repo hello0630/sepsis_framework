@@ -12,7 +12,6 @@ from src.features.signatures.augmentations import LeadLag, AddTime, PenOff, Cumu
 from src.features.transfomers import RollingStatistic, FeaturePipeline
 from src.models.model_selection import CustomStratifiedGroupKFold
 from src.models.optimizers import ThresholdOptimizer
-from src.models.nets.nets import Autoencoder
 # TODO Need to rethink some things, if we intend to do find min/max features then apply penoff, there is a lot of /
 # TODO censored data. Instead we should aim to include time and allow for shorter intervals to be given, but the time
 # TODO exist as a parameter, then the algo can decide for itself...
@@ -35,15 +34,6 @@ features = FeaturePipeline(steps=steps).transform(dataset)
 names = [x + '_count' for x in feature_dict['counts']] + [x + '_max' for x in feature_dict['vitals']] + [x + '_min' for x in feature_dict['vitals']]
 dataset.add_features(features, names)
 
-# Signatures
-augmentations = [
-    # AddTime(),
-    LeadLag(),
-]
-signature_transformer = DatasetSignatures(augmentations, window=7, depth=3, logsig=True, nanfill=True)
-features = ['SOFA', 'MAP', 'BUN/CR', 'ShockIndexAgeNorm', 'HR']
-signatures = signature_transformer.transform(dataset, features)
-dataset.add_features(signatures)
 
 # Extract machine learning data
 X, _ = dataset.to_ml()
