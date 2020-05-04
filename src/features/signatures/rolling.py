@@ -7,6 +7,7 @@ from definitions import *
 import numpy as np
 import torch
 import signatory
+from src.features.signatures.augmentations import LeadLag
 
 
 class RollingMixin():
@@ -104,6 +105,32 @@ class RollingPenOff(RollingMixin):
         return penoff_signatures
 
 
+class RollingLeadLag(RollingMixin):
+    """ Rolling signature computation with the leadlag transform. """
+    def __init__(self, window=6, depth=3, logsig=False):
+        self.window = window
+        self.depth = depth
+        self.logsig = logsig
+
+    def transform(self, data):
+        # Apply the leadlag transform
+        ll_data = LeadLag().transform(data)
+
+        # Compute the signatures
+        signatures = self.rolling_signature(ll_data, self.window * 2, logsig=self.logsig)
+
+        # Reduce the leadlag size
+
+        # Add on the nans
+
+
+        pass
+
+
+
 if __name__ == '__main__':
     dataset = load_pickle(DATA_DIR + '/interim/preprocessed/dataset.dill')
+    data = torch.rand(2, 10, 2)
+    signatures = RollingLeadLag().transform(data)
+
     RollingPenOff().transform(dataset['SBP'])

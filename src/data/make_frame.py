@@ -10,7 +10,7 @@ from tqdm import tqdm
 from src.data.transformers import LabelsToScores
 
 
-if __name__ == '__main__':
+def load_to_dataframe():
     # File locations
     locations = [DATA_DIR + '/raw/' + x for x in ['training_A', 'training_B']]
 
@@ -36,6 +36,12 @@ if __name__ == '__main__':
     df.reset_index(inplace=True)
     df.rename(columns={'index': 'time'}, inplace=True)
     df = df[['id', 'time'] + [x for x in df.columns if x not in ['id', 'time', 'SepsisLabel']] + ['SepsisLabel']]
+
+    return df
+
+
+if __name__ == '__main__':
+    df = load_to_dataframe()
 
     # Save frame
     save_pickle(df, DATA_DIR + '/interim/from_raw/df.pickle')
