@@ -1,63 +1,14 @@
-base_project
+Sepsis Framework
 ==============================
+A framework for dealing with the physionet 2019 sepsis dataset and making predictions to be scored against the pre-defined utility function. 
 
-This project contains some basic additions to the cookiecutter datascience project that I typically use across all 
-projects for which I follow this template. Simply git clone this for a faster start-up.
+My suggestion is to setup a virtual environment folder at /env/ in the root directory of this project. Install the requirements with 
+```
+pip install -r requirements.txt
+```
 
-Project Organization
-------------
-
-    ├── LICENSE
-    ├── Makefile           <- Makefile with commands like `make data` or `make train`
-    ├── README.md          <- The top-level README for developers using this project.
-    ├── data
-    │   ├── external       <- Data from third party sources.
-    │   ├── interim        <- Intermediate data that has been transformed.
-    │   ├── processed      <- The final, canonical data sets for modeling.
-    │   └── raw            <- The original, immutable data dump.
-    │
-    ├── docs               <- A default Sphinx project; see sphinx-doc.org for details
-    │
-    ├── models             <- Trained and serialized models, model predictions, or model summaries
-    │
-    ├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
-    │                         the creator's initials, and a short `-` delimited description, e.g.
-    │                         `1.0-jqp-initial-data-exploration`.
-    │
-    ├── references         <- Data dictionaries, manuals, and all other explanatory materials.
-    │
-    ├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-    │   └── figures        <- Generated graphics and figures to be used in reporting
-    │
-    ├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-    │                         generated with `pip freeze > requirements.txt`
-    │
-    ├── setup.py           <- makes project pip installable (pip install -e .) so src can be imported
-    ├── src                <- Source code for use in this project.
-    │   ├── __init__.py    <- Makes src a Python module
-    │   │
-    │   ├── data           <- Scripts to download or generate data
-    │   │   └── make_dataset.py
-    │   │
-    │   ├── features       <- Scripts to turn raw data into features for modeling
-    │   │   └── build_features.py
-    │   │
-    │   ├── omni           <- Global functions to be used everywhere.
-    │   │   │                 
-    │   │   ├── decorators.py
-    │   │   └── functions.py
-    │   │
-    │   ├── models         <- Scripts to train models and then use trained models to make
-    │   │   │                 predictions
-    │   │   ├── predict_model.py
-    │   │   └── train_model.py
-    │   │
-    │   └── visualization  <- Scripts to create exploratory and results oriented visualizations
-    │       └── visualize.py
-    │
-    └── tox.ini            <- tox file with settings for running tox; see tox.testrun.org
-
-
---------
-
-<p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
+Create a `data/` folder in the project directory, make this a symlink if you wish to store it somewhere else, then create a `data/raw` folder. 
+1. Run `src/data/download.py` to download the raw data into `data/raw`.
+2. Run `src/data/make_frame.py` to convert the data into a dataframe format useful for visualisation in notebooks. 
+3. Run `src/data/preprocess.py` to perform various preprocessing steps (that one may want to change if running your own models) that includes simple feature derivation, and converts the ragged data into a nan filled tensor.
+4. Run `src/models/predict_model.py` to run a simple model and get cross-validated scores. 
