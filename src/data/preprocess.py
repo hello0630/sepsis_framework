@@ -5,6 +5,7 @@ Any preprocessing to apply to the data before we put it into a learning model.
 """
 from definitions import *
 import torch
+from tqdm import tqdm
 from src.data.dataset.dataset import TimeSeriesDataset
 from src.data.dicts import feature_dict as feature_dict
 from src.data.transformers import ForwardFill, DerivedFeatures
@@ -43,9 +44,37 @@ def preprocess_labels(scores):
     return utility_value, labels
 
 
-if __name__ == '__main__':
-    # Load
-    dataset = load_pickle(DATA_DIR + '/interim/from_raw/dataset.dill')
+def make_timeseries_dataset():
+    """ Turn the data into a time-series dataset. """
+    # Get data
+    df = load_pickle(DATA_DIR + '/interim/from_raw/df.pickle')
+    labels_utility = torch.Tensor(load_pickle(DATA_DIR + '/processed/labels/utility_scores.pickle'))
+    labels_binary = torch.Tensor(load_pickle(DATA_DIR + '/processed/labels/binary.pickle'))
+
+    # Remove unwanted cols
+    df.drop(['time', 'SepsisLabel'], axis=1, inplace=True)
+    columns = list(df.drop(['id'], axis=1).columns)
+
+    # Convert df data to tensor form
+    tensor_data = []
+    ids = df['id'].unique()
+    for id in tqdm(ids):
+        data = df[df['id'] == id].drop('id', axis=1)
+        tensor_data.append(torch.Tensor(data.values.astype(float)))
+
+    # Create dataset
+    dataset = TimeSeriesDataset(data=tensor_data, labels=labels_binary, columns=columns, ids=ids)
+
+    # Useful to include binary_labels attr.
+    save_pickle(dataset, DATA_DIR + '/interim/from_raw/dataset.dill', use_dill=True)
+
+    return dataset
+
+
+
+def main():
+    # Make the dataset
+    dataset = make_timeseries_dataset()
     scores = load_pickle(DATA_DIR + '/processed/labels/full_scores.pickle')
 
     # Dataset preprocessing
@@ -56,3 +85,7 @@ if __name__ == '__main__':
     dataset.labels_utility = utility_value
 
     save_pickle(dataset, DATA_DIR + '/interim/preprocessed/dataset.dill', use_dill=True)
+
+
+if __name__ == '__main__':
+    main()

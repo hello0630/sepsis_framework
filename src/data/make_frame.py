@@ -12,7 +12,7 @@ from src.data.transformers import LabelsToScores
 
 def load_to_dataframe():
     # File locations
-    locations = [DATA_DIR + '/raw/' + x for x in ['training_A', 'training_B']]
+    locations = [DATA_DIR + '/raw/' + x for x in ['training_setA', 'training_setB']]
 
     # Ready to store and concat
     data = []

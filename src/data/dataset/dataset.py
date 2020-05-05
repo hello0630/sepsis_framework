@@ -152,27 +152,3 @@ class TimeSeriesDataset(BaseEstimator):
 
 
 
-if __name__ == '__main__':
-    # Get data
-    df = load_pickle(DATA_DIR + '/interim/from_raw/df.pickle')
-    labels_utility = torch.Tensor(load_pickle(DATA_DIR + '/processed/labels/utility_scores.pickle'))
-    labels_binary = torch.Tensor(load_pickle(DATA_DIR + '/processed/labels/binary.pickle'))
-
-    # Remove unwanted cols
-    df.drop(['time', 'SepsisLabel'], axis=1, inplace=True)
-    columns = list(df.drop(['id'], axis=1).columns)
-
-    # Convert df data to tensor form
-    tensor_data = []
-    ids = df['id'].unique()
-    for id in tqdm(ids):
-        data = df[df['id'] == id].drop('id', axis=1)
-        tensor_data.append(torch.Tensor(data.values))
-
-    # Create dataset
-    dataset = TimeSeriesDataset(data=tensor_data, labels=labels_binary, columns=columns, ids=ids)
-
-    # Useful to include binary_labels attr.
-    save_pickle(dataset, DATA_DIR + '/interim/from_raw/dataset.dill', use_dill=True)
-
-

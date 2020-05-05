@@ -8,10 +8,7 @@ from pathlib import Path
 
 ROOT_DIR = str(Path(__file__).resolve().parents[0])
 
-if ROOT_DIR == '/home/morrill/Documents/sepsis_framework':
-    DATA_DIR = '/scratch/morrill/sepsis_framework/data'
-else:
-    DATA_DIR = ROOT_DIR + '/data'
+DATA_DIR = ROOT_DIR + '/data'
 MODELS_DIR = ROOT_DIR + '/models'
 
 # Packages/functions used everywhere

@@ -19,9 +19,8 @@ from src.models.optimizers import ThresholdOptimizer
 # CUDA
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# Load the data
+# Load the dataset
 dataset = load_pickle(DATA_DIR + '/interim/preprocessed/dataset.dill')
-# dataset.data.to(device)
 
 # Compute some features
 steps = [
@@ -33,6 +32,18 @@ steps = [
 features = FeaturePipeline(steps=steps).transform(dataset)
 names = [x + '_count' for x in feature_dict['counts']] + [x + '_max' for x in feature_dict['vitals']] + [x + '_min' for x in feature_dict['vitals']]
 dataset.add_features(features, names)
+
+# Add some signatures
+augmentations = [
+    # AddTime(),
+    LeadLag(),
+]
+ds = DatasetSignatures(augmentations, window=14, depth=3, logsig=True, nanfill=True)
+features = ['SOFA', 'MAP', 'BUN/CR', 'HR', 'SBP', 'ShockIndexAgeNorm']
+signatures = ds.transform(dataset, features)
+print(dataset.data.shape)
+dataset.add_features(signatures)
+print(dataset.data.shape)
 
 # Extract machine learning data
 X, _ = dataset.to_ml()

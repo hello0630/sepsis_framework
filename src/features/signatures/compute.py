@@ -14,7 +14,18 @@ from src.features.signatures.functions import leadlag_slice
 
 
 class DatasetSignatures():
-    """ Signature computation method to work on TimeSeriesDatasets. """
+    """Signature computation method to work with the TimeSeriesDataset class.
+
+    Computes signatures over a rolling window on a time series dataset.
+
+    Args:
+        augmentations (list): A list of augmentations from src.features.signatures.augmentations. These will be applied
+            to the path prior to signature computation.
+        window (int): The length of the rolling window.
+        depth (int): The depth to compute the signature to.
+        nanfill (bool): Fill nans if they exist with zeros, this prevents a nan early on from breaking the signature
+            computation later.
+    """
     def __init__(self, augmentations, window, depth, logsig=False, nanfill=True, window_censor=True):
         self.augmentations = augmentations
         self.window = window
