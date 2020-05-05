@@ -45,7 +45,7 @@ def preprocess_labels(scores):
 
 if __name__ == '__main__':
     # Load
-    dataset = load_pickle(DATA_DIR + '/interim/from_raw/dataset.dill', use_dill=True)
+    dataset = load_pickle(DATA_DIR + '/interim/from_raw/dataset.dill')
     scores = load_pickle(DATA_DIR + '/processed/labels/full_scores.pickle')
 
     # Dataset preprocessing

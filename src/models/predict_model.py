@@ -34,7 +34,6 @@ features = FeaturePipeline(steps=steps).transform(dataset)
 names = [x + '_count' for x in feature_dict['counts']] + [x + '_max' for x in feature_dict['vitals']] + [x + '_min' for x in feature_dict['vitals']]
 dataset.add_features(features, names)
 
-
 # Extract machine learning data
 X, _ = dataset.to_ml()
 y = dataset.labels_utility
